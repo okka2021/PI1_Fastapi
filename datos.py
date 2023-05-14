@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 # Establecer el idioma local en español
-import locale
-locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
+#import locale
+#locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
 
 def create_df():
     
