@@ -2,10 +2,10 @@
 import pandas as pd 
 import numpy as np
 from datetime import datetime
-# Establecer el idioma local en español
-#import locale
-#locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 
+#funcion para importar el codigo de datos.py en main.py
 def create_df():
     
     #creacion de df por cada archivo suministrado de la informacion de las plataformas"
@@ -15,7 +15,7 @@ def create_df():
     movies["revenue"].fillna(0, inplace = True)
     movies["budget"].fillna(0, inplace = True)
    
-   #Los valores nulos del campo release date deben eliminarse para poder realizar la transformacion de el formato de fecha
+   #Los valores nulos del campo release date se eliminan para poder realizar la transformacion de el formato de fecha
     movies.dropna(subset=['release_date'], inplace=True)
    
    #estandarizacion de fecha al formato AAAA-mm-dd
@@ -44,12 +44,30 @@ def create_df():
    
    #eliminación de columnas que no constituyen informacion relevante para las querys
     movies=movies.drop(['video','imdb_id','adult','original_title','vote_count','poster_path','homepage'],axis=1)
-   
-   
-   
-   
-   
-   
-   
     
     return movies
+
+def movies_df():
+    movies = pd.read_csv('movies_dataset.csv')
+    movies["revenue"].fillna(0, inplace = True)
+    movies["budget"].fillna(0, inplace = True)
+    movies.dropna(subset=['release_date'], inplace=True)
+    movies['release_date'] =movies['release_date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').strftime('%Y-%m-%d') if len(x) > 2 else '')
+    movies = movies.drop(movies[movies['release_date'].isna()].index)
+    movies['release_year'] = movies['release_date'].str.slice(0,4)
+    movies['release_date'] = pd.to_datetime(movies['release_date'],format='%Y-%m-%d')
+    movies['release_month'] = movies['release_date'].dt.strftime('%B')
+    movies['budget'] = pd.to_numeric(movies['budget'], errors='coerce')
+    movies['budget'] = movies['budget'].fillna(0)
+    movies['revenue'] = movies['revenue'].fillna(0)
+    movies['return'] = movies.apply(lambda x: x['revenue'] / x['budget'] if x['budget'] != 0 else 0, axis=1)
+    movies=movies.drop(['video','imdb_id','adult','original_title','vote_count','poster_path','homepage'],axis=1)
+    
+    movies_re = movies[[ 'id',  'popularity', 
+        'title', 'vote_average',
+       'release_year']].copy()
+    
+    movies_re=movies_re.dropna()
+    
+    
+    return movies_re
