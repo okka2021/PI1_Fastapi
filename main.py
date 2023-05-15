@@ -152,18 +152,24 @@ def retorno(pelicula: str):
     }
     return respuesta
 
-# ML
+# sistema de recomendacion que utiliza TF-IDF y similitud coseno para encontrar las películas más similares 
+    # a una película de referencia y devuelve una lista de títulos de películas recomendadas.
 @app.get('/recomendacion/{titulo}')
 def recomendacion(titulo:str):
     movies_re = movies_df()
+    #Se utiliza el método TfidfVectorizer para calcular la importancia relativa de los términos en los 
+    # títulos de las películas, eliminando las palabras comunes en inglés.
     tfidf = TfidfVectorizer(stop_words='english')
+    #Se crea una matriz tfidf_matrix que representa la importancia de los términos en cada película.
     tfidf_matrix = tfidf.fit_transform(movies_re['title'])
+    #Se calcula la similitud coseno entre todas las películas utilizando la matriz tfidf_matrix, 
+    # obteniendo la matriz cosine_similarities.
     cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
-    
     indice = movies_re[movies_re['title'] == titulo].index[0]
     puntuaciones_similares = list(enumerate(cosine_similarities[indice]))
     puntuaciones_similares = sorted(puntuaciones_similares, key=lambda x: x[1], reverse=True)
-    puntuaciones_similares = puntuaciones_similares[1:6]  # Obtiene las 5 películas más similares
+    # Obtiene las 5 películas más similares
+    puntuaciones_similares = puntuaciones_similares[1:6]  
     
     indices_peliculas = [i[0] for i in puntuaciones_similares]
     
