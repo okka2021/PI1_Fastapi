@@ -52,6 +52,9 @@ def create_df():
 def movies_df():
     #se toma el codigo para poder crear el EDA para el modelo de recomendacion
     movies = pd.read_csv('movies_dataset.csv')
+    movies["revenue"].fillna(0, inplace = True)
+    movies["budget"].fillna(0, inplace = True)
+    movies.dropna(subset=['release_date'], inplace=True)
     movies['release_date'] =movies['release_date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').strftime('%Y-%m-%d') if len(x) > 2 else '')
     movies = movies.drop(movies[movies['release_date'].isna()].index)
     movies['release_year'] = movies['release_date'].str.slice(0,4)
